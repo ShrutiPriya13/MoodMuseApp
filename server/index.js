@@ -4,6 +4,7 @@ const session = require('express-session');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const serverless = require('serverless-http');
 
 dotenv.config();
 
@@ -20,7 +21,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: 'https://mood-muse-7j6sxi5r9-shrutis-projects-3226d360.vercel.app', // ✅ Use your deployed frontend domain
   credentials: true
 }));
 app.use(express.json());
@@ -30,21 +31,20 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false, // Set to true if using HTTPS
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    secure: false,
+    maxAge: 24 * 60 * 60 * 1000
   }
 }));
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Mount Auth Routes
+// Routes
 app.use('/auth', authRoutes);
 app.use('/api/songs', spotifyRoutes);
 
-// Root route
 app.get('/', (req, res) => {
-  res.send('Server running...');
+  res.send('Serverless backend is running!');
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server started on http://localhost:${PORT}`));
+// ✅ Export the app wrapped with serverless-http
+module.exports = serverless(app);
